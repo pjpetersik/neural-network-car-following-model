@@ -5,8 +5,11 @@ from a traffic jam experiment conducted by Sugiyama et al. (2008) (http://iopsci
 
 ## Requirements
 Keras
+
 Numpy
+
 matplotlib
+
 pandas
 
 ## Data
