@@ -68,6 +68,7 @@ class model(object):
         
         self.dot_x[:,i+1] = self.dot_x[:,i] + h/6. * (k1 + 2*k2 + 2*k3 + k4) 
         
+        # just allow postive velocities
         self.dot_x[self.dot_x[:,i+1]<0,i+1] = 0.
         
         self.x[:,i+1]      = self.x[:,i] + self.dot_x[:,i+1] * h
