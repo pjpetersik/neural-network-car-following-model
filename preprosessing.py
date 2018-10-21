@@ -26,7 +26,7 @@ input_directory = "raw/"
 output_directory = "processed/"
 
 # read data
-case = 2
+case = 1
 raw_data = pd.read_csv(input_directory+"case"+str(case)+".data",skiprows=14,sep='\s+', names=["position","time"],skip_blank_lines=False)
 
 raw_position = raw_data["position"]

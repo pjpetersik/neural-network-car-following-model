@@ -38,8 +38,8 @@ def plots(model):
     ax_scatter = ax.scatter(Delta_x[car,start:end:jump],dot_x[car,start:end:jump],marker="x",s=10,c=c[::jump])
     ax.set_xlabel('headway [m]', fontsize = fs)
     ax.set_ylabel('velocity [s]',fontsize = fs)
-    ax.set_ylim(0,10)
-    ax.set_xlim(0,15)
+    #ax.set_ylim(0,10)
+    #ax.set_xlim(0,15)
     ax.tick_params(direction="in")
     ax.set_title(r'ANN, $L=$'+str(model.L))
     cb=fig.colorbar(ax_scatter, ax=ax)
@@ -78,8 +78,8 @@ def plots(model):
     grid_dot_x = griddata(points, dot_x_values, (grid_x, grid_t), method='linear')
     
     cmap = "inferno"
-    contours = np.linspace(0,9,21)
-    cf = ax.contourf(time,distance,grid_dot_x.T,contours,cmap=cmap, extend="max")
+    contours = np.linspace(0.,9,21)
+    cf = ax.contourf(time,distance,grid_dot_x.T,contours,cmap=cmap, extend="both")
     ax.set_xlabel("time [s]", fontsize = fs)
     ax.set_ylabel("position [m]", fontsize = fs)
     ax.tick_params(direction="in")
@@ -95,8 +95,8 @@ def plots(model):
     ax.set_xlabel("time [s]",fontsize = fs)
     ax.set_ylabel("std($\Delta$x) [m]",fontsize = fs)
     ax.tick_params(direction="in")
-    ax.set_xlim(0,250)
-    ax.set_ylim(0,6)
+    #ax.set_xlim(0,250)
+    #ax.set_ylim(0,6)
     
 # =============================================================================
 # standard deviation velocity
@@ -107,5 +107,5 @@ def plots(model):
     ax.set_xlabel("time [s]",fontsize = fs)
     ax.set_ylabel("std($\dot{x}$) [m/s]",fontsize = fs)
     ax.tick_params(direction="in")
-    ax.set_xlim(0,250)
-    ax.set_ylim(0,4)
+    #ax.set_xlim(0,250)
+    #ax.set_ylim(0,4)

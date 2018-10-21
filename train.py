@@ -17,7 +17,7 @@ def normalize(x):
     x_norm = (x-x_mean)/x_std
     return x_norm,x_mean,x_std
 
-#%% =============================================================================
+# =============================================================================
 # Load trainings dataset
 # =============================================================================
 data_dir = "processed/"
@@ -27,7 +27,9 @@ case = 1
 
 # number of leading cars that are used for the labels
 car = 0
-n_leading_cars = 3  
+n_leading_cars = 2 
+
+RNN = True
 
 # load pre processed data
 Dx = np.loadtxt(data_dir+"case"+str(case)+"/headway.txt")
@@ -39,9 +41,6 @@ D_dotx = np.loadtxt(data_dir+"case"+str(case)+"/velocity_difference.txt")
 Dx_append = np.array(Dx[car:car+n_leading_cars,:])
 dotx_append = np.array(dotx[car:car+n_leading_cars,:])
 D_dotx_append = np.array(D_dotx[car:car+n_leading_cars,:])
-#Dx_append = np.array(Dx[0:n_leading_cars,:])
-#dotx_append = np.array(dotx[0:n_leading_cars,:])
-#D_dotx_append = np.array(D_dotx[0:n_leading_cars,:])
 
 # pre-array for labels, filled with acceleration
 ddotx_append = np.array(ddotx[car,:])
@@ -60,6 +59,10 @@ D_dotx, meanD_dotx, stdD_dotx = normalize(D_dotx)
 #X = np.concatenate((Dx,dotx,D_dotx),axis=1)
 X = np.concatenate((Dx,dotx),axis=1)
 
+if RNN:
+    X = X.reshape(X.shape[0],1,X.shape[1])
+    X = np.concatenate((X,np.roll(X,1,axis=0)),axis=1)
+
 # rename label for a clearer code
 y =  ddotx_append.T
 
@@ -67,7 +70,12 @@ y =  ddotx_append.T
 # # build and train the model
 # =============================================================================
 model = kr.Sequential()
-model.add(kr.layers.Dense(5, input_dim=len(X[0]),activation='relu'))
+if RNN:
+    model.add(kr.layers.SimpleRNN(20, activation='relu', input_shape=(X.shape[1],X.shape[2])))
+    model.add(kr.layers.Dropout(0.2))
+else:
+    model.add(kr.layers.Dense(5, input_dim=len(X[0]),activation='relu'))
+    
 model.add(kr.layers.Dense(5, activation='relu'))
 model.add(kr.layers.Dense(1, activation='linear'))
 
@@ -77,13 +85,14 @@ model.compile(loss="mean_squared_error", optimizer=optimizer, metrics=['mse'])
 
 es = kr.callbacks.EarlyStopping(monitor='val_loss',
                               min_delta=0.0,
-                              patience=100,
+                              patience=50,
                               verbose=0, mode='auto')
-history = model.fit(X, y, epochs=500, batch_size=20,verbose=2,shuffle=True,validation_split=0.1,callbacks=[es])
+
+history = model.fit(X, y, epochs=500, batch_size=50,verbose=2,shuffle=True,validation_split=0.1,callbacks=[es])
 
 model.save('model/model.h5')
 
-np.savetxt("model/model_parameter.txt",[meanDx,stdDx,meandotx,stddotx,n_leading_cars])
+np.savetxt("model/model_parameter.txt",[meanDx,stdDx,meandotx,stddotx,n_leading_cars,RNN])
 
 #%% =============================================================================
 # Plot history
@@ -112,8 +121,14 @@ plt.legend()
 # plot weights of first layer
 weights = model.layers[0].get_weights()
 cm=plt.cm.bwr
-C=plt.matshow(weights[0].T,cmap=cm)
+C=plt.matshow(weights[0].T,cmap=cm,vmin=-1,vmax=1)
 plt.ylabel("to hidden layer neuron",fontsize=14)
 plt.xlabel("from input neuron",fontsize=14)
 plt.gca().xaxis.tick_bottom()
 plt.colorbar(C).set_label(label="weights",size=14)
+
+C2=plt.matshow(weights[1].T,cmap=cm,vmin=-1,vmax=1)
+plt.ylabel("to hidden layer neuron",fontsize=14)
+plt.xlabel("from input neuron",fontsize=14)
+plt.gca().xaxis.tick_bottom()
+plt.colorbar(C2).set_label(label="weights",size=14)

@@ -16,11 +16,11 @@ import time
 print "Run ANN model #################"
 
 N = 22
-L = 230
-dt =  0.1
-tmax = 100
+L = 230.
+dt =  1./3.
+tmax = 250
 xpert= np.zeros(N)
-xpert = 15*np.sin(2*np.pi/float(N)*np.arange(N))
+xpert = 1*np.sin(2*np.pi/float(N)*np.arange(N))
 
 # Model simulation
 start = time.time() 
@@ -33,7 +33,7 @@ end = time.time()
 
 print "calculation time: "+str(end-start)
 
-# plot various variables
+#%% plot various variables
 plt.close("all")
 
 plots(m)
