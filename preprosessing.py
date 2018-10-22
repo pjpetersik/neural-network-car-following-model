@@ -13,6 +13,17 @@ import matplotlib.pyplot as plt
 plt.close("all")
 from scipy.interpolate import griddata
 
+def moveAvg(x,option):
+    summed = np.zeros_like(x[:,0:-option+1])
+    for i in range(option):
+        last = -option+i+1
+        if last == 0:
+            summed = summed + x[:,i:]
+        else:
+            summed = summed + x[:,i:last]
+    
+    return summed/float(option)
+mvavg = 3
 
 #%% =============================================================================
 # Load trainings dataset
@@ -85,13 +96,15 @@ ddotx = acceleration[:,2:-2]
 # shift target (prediction of the acceleration of the next time step i+1)
 ddotx = np.roll(ddotx,-1,axis=1)
 
+t,x,Dx,dotx,D_dotx,ddotx = map(lambda x : moveAvg(x,mvavg),[t,x,Dx,dotx,D_dotx,ddotx])
+
 #delete last array entry since it loses meaning due to shifting
-t= t[:,:-1]
-x = x[:,:-1]
-Dx = Dx[:,:-1]
-dotx = dotx[:,:-1]
-D_dotx = D_dotx[:,:-1]
-ddotx = ddotx[:,:-1]
+t= t[:,:-3]
+x = x[:,:-3]
+Dx = Dx[:,:-3]
+dotx = dotx[:,:-3]
+D_dotx = D_dotx[:,:-3]
+ddotx = ddotx[:,:-3]
 
 #save data 
 np.savetxt(output_directory+"case"+str(case)+"/position.txt",x)
@@ -106,7 +119,7 @@ np.savetxt(output_directory+"case"+str(case)+"/time.txt",t)
 fig, ax = plt.subplots()
 
 
-car =  0
+car =  17
 start = 0
 end   = len(Dx[0,:])
 iters = end - start
@@ -119,8 +132,8 @@ c = np.linspace(0,np.max(time),end)
 ax_scatter = ax.scatter(Dx[car,:],dotx[car,:], marker="x",s=10,c=c)
 ax.set_xlabel(r'$\Delta x$', fontsize = fs)
 ax.set_ylabel(r'$\dot{x}$',fontsize = fs)
-ax.set_ylim(-1,12)
-ax.set_xlim(0,35)
+#ax.set_ylim(0,10)
+ax.set_xlim(6,15)
 ax.tick_params(direction="in")
 cb=fig.colorbar(ax_scatter, ax=ax)
 cb.set_label(label="time [s]",size=fs)

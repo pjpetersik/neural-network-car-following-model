@@ -56,8 +56,6 @@ def plots(model):
     #ax.set_title("car positions", fontsize = fs)
     ax.set_ylabel("position [m]", fontsize = fs)
     ax.set_xlabel("time [s]", fontsize = fs)
-    ax.set_ylim(0,model.L)
-    ax.set_xlim(0,model.tmax)
     ax.tick_params(direction="in")
 # =============================================================================
 #     hmodelöller velocites

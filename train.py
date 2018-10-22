@@ -26,10 +26,10 @@ data_dir = "processed/"
 case = 1
 
 # number of leading cars that are used for the labels
-car = 0
-n_leading_cars = 2 
+car = 17
+n_leading_cars = 3
 
-RNN = True
+RNN = False
 
 # load pre processed data
 Dx = np.loadtxt(data_dir+"case"+str(case)+"/headway.txt")
@@ -41,9 +41,19 @@ D_dotx = np.loadtxt(data_dir+"case"+str(case)+"/velocity_difference.txt")
 Dx_append = np.array(Dx[car:car+n_leading_cars,:])
 dotx_append = np.array(dotx[car:car+n_leading_cars,:])
 D_dotx_append = np.array(D_dotx[car:car+n_leading_cars,:])
-
 # pre-array for labels, filled with acceleration
 ddotx_append = np.array(ddotx[car,:])
+
+#for i in range(1,3):
+#    Dx_append = np.concatenate((Dx_append,np.roll(Dx,i,axis=1)[0:n_leading_cars,:]),axis=0)
+#    dotx_append = np.concatenate((dotx_append,np.roll(dotx,i,axis=1)[0:n_leading_cars,:]),axis=0)
+
+### use all data
+#for i in range(1,5):
+#    Dx_append = np.concatenate((Dx_append,np.roll(Dx,i,axis=0)[0:n_leading_cars,:]),axis=1)
+#    dotx_append = np.concatenate((dotx_append,np.roll(dotx,i,axis=0)[0:n_leading_cars,:]),axis=1)
+#    D_dotx_append = np.concatenate((D_dotx_append,np.roll(D_dotx,i,axis=0)[0:n_leading_cars,:]),axis=1)
+#    ddotx_append = np.concatenate((ddotx_append,np.roll(ddotx,i,axis=0)[0,:]),axis=0)
 
 # transpose array because time need to the first array dimension  
 Dx    = Dx_append.T
@@ -63,6 +73,8 @@ if RNN:
     X = X.reshape(X.shape[0],1,X.shape[1])
     X = np.concatenate((X,np.roll(X,1,axis=0)),axis=1)
 
+
+
 # rename label for a clearer code
 y =  ddotx_append.T
 
@@ -70,16 +82,20 @@ y =  ddotx_append.T
 # # build and train the model
 # =============================================================================
 model = kr.Sequential()
+
 if RNN:
-    model.add(kr.layers.SimpleRNN(20, activation='relu', input_shape=(X.shape[1],X.shape[2])))
+    model.add(kr.layers.SimpleRNN(100, activation='relu', input_shape=(X.shape[1],X.shape[2])))
     model.add(kr.layers.Dropout(0.2))
+    model.add(kr.layers.Dense(10, activation='relu'))
+
 else:
-    model.add(kr.layers.Dense(5, input_dim=len(X[0]),activation='relu'))
+    model.add(kr.layers.Dense(100, input_dim=len(X[0]),activation='relu'))
+    model.add(kr.layers.Dropout(0.2))
+    model.add(kr.layers.Dense(10, activation='relu'))
     
-model.add(kr.layers.Dense(5, activation='relu'))
 model.add(kr.layers.Dense(1, activation='linear'))
 
-optimizer = kr.optimizers.Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False)
+optimizer = kr.optimizers.Adam(lr=0.0001, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0., amsgrad=False)
 
 model.compile(loss="mean_squared_error", optimizer=optimizer, metrics=['mse'])
 
@@ -88,7 +104,7 @@ es = kr.callbacks.EarlyStopping(monitor='val_loss',
                               patience=50,
                               verbose=0, mode='auto')
 
-history = model.fit(X, y, epochs=500, batch_size=50,verbose=2,shuffle=True,validation_split=0.1,callbacks=[es])
+history = model.fit(X, y, epochs=1000, batch_size=20,verbose=2,shuffle=True,validation_split=0.1,callbacks=[es])
 
 model.save('model/model.h5')
 

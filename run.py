@@ -20,7 +20,8 @@ L = 230.
 dt =  1./3.
 tmax = 250
 xpert= np.zeros(N)
-xpert = 1*np.sin(2*np.pi/float(N)*np.arange(N))
+#xpert = 2*np.sin(2*np.pi/float(N)*np.arange(N))
+xpert = np.random.uniform(-0.1,0.1,N)
 
 # Model simulation
 start = time.time() 
