@@ -107,9 +107,9 @@ class model(object):
         
         if self.rnn:
             X = shape(Delta_x,dot_x)
-            X_prev = shape(prev_Delta_x,prev_dot_x)
-            
-            X = np.concatenate((X,X_prev),axis=1)
+#            X_prev = shape(prev_Delta_x,prev_dot_x)
+#            
+#            X = np.concatenate((X,X_prev),axis=1)
         else:
             X = shape(Delta_x,dot_x)
             

@@ -14,6 +14,9 @@ plt.close("all")
 from scipy.interpolate import griddata
 
 def moveAvg(x,option):
+    if option==1:
+        return x
+    
     summed = np.zeros_like(x[:,0:-option+1])
     for i in range(option):
         last = -option+i+1

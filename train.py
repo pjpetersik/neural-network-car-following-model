@@ -26,10 +26,10 @@ data_dir = "processed/"
 case = 1
 
 # number of leading cars that are used for the labels
-car = 17
-n_leading_cars = 3
+car = 0
+n_leading_cars = 2
 
-RNN = False
+RNN = True
 
 # load pre processed data
 Dx = np.loadtxt(data_dir+"case"+str(case)+"/headway.txt")
@@ -71,10 +71,9 @@ X = np.concatenate((Dx,dotx),axis=1)
 
 if RNN:
     X = X.reshape(X.shape[0],1,X.shape[1])
-    X = np.concatenate((X,np.roll(X,1,axis=0)),axis=1)
-
-
-
+    #Xnew = np.concatenate((X,np.roll(X,1,axis=0)),axis=1)
+    #X = Xnew
+    
 # rename label for a clearer code
 y =  ddotx_append.T
 
@@ -84,12 +83,14 @@ y =  ddotx_append.T
 model = kr.Sequential()
 
 if RNN:
-    model.add(kr.layers.SimpleRNN(100, activation='relu', input_shape=(X.shape[1],X.shape[2])))
+    model.add(kr.layers.LSTM(100, activation='relu', input_shape=(X.shape[1],X.shape[2])))
     model.add(kr.layers.Dropout(0.2))
     model.add(kr.layers.Dense(10, activation='relu'))
 
 else:
     model.add(kr.layers.Dense(100, input_dim=len(X[0]),activation='relu'))
+    model.add(kr.layers.Dropout(0.2))
+    model.add(kr.layers.Dense(50, activation='relu'))
     model.add(kr.layers.Dropout(0.2))
     model.add(kr.layers.Dense(10, activation='relu'))
     
@@ -101,10 +102,10 @@ model.compile(loss="mean_squared_error", optimizer=optimizer, metrics=['mse'])
 
 es = kr.callbacks.EarlyStopping(monitor='val_loss',
                               min_delta=0.0,
-                              patience=50,
+                              patience=500,
                               verbose=0, mode='auto')
 
-history = model.fit(X, y, epochs=1000, batch_size=20,verbose=2,shuffle=True,validation_split=0.1,callbacks=[es])
+history = model.fit(X, y, epochs=10000, batch_size=X.shape[0],verbose=2,shuffle=True,validation_split=0.1,callbacks=[es])
 
 model.save('model/model.h5')
 

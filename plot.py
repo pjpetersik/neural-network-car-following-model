@@ -45,23 +45,23 @@ def plots(model):
     cb=fig.colorbar(ax_scatter, ax=ax)
     cb.set_label(label="time [s]",size=fs)
 # =============================================================================
-#     headway velocities
+#    trajectories
 # =============================================================================
     fig, ax = plt.subplots()
     for j in np.arange(0,model.N,jump):
         diffx = np.roll(x[j,:],-1)-x[j,:]
         masked_x = np.ma.array(x[j,:])
-        masked_x[diffx<-200] = np.ma.masked 
+        masked_x[diffx<-100] = np.ma.masked 
         ax.plot(time,masked_x,lw=0.8,c="red")
     #ax.set_title("car positions", fontsize = fs)
     ax.set_ylabel("position [m]", fontsize = fs)
     ax.set_xlabel("time [s]", fontsize = fs)
     ax.tick_params(direction="in")
 # =============================================================================
-#     hmodelöller velocites
+#     hovmöller velocites
 # =============================================================================
     fig, ax = plt.subplots()
-    jump = int(model.tmax/100)  # just consider every 100 iteration for the interpolation to save time
+    jump = int(model.tmax/20)  # just consider every 20 iteration for the interpolation to save time
     x_data = x[:,::jump]
     dot_x_data = dot_x[:,::jump]
     t_data = time[::jump]
@@ -75,7 +75,7 @@ def plots(model):
     dot_x_values = dot_x_data.reshape(model.N*lent)
     grid_dot_x = griddata(points, dot_x_values, (grid_x, grid_t), method='linear')
     
-    cmap = "inferno"
+    cmap = "gist_ncar"
     contours = np.linspace(0.,9,21)
     cf = ax.contourf(time,distance,grid_dot_x.T,contours,cmap=cmap, extend="both")
     ax.set_xlabel("time [s]", fontsize = fs)
